@@ -1,0 +1,52 @@
+{
+  "name": "fifteen-puzzle",
+  "version": "1.0.0",
+  "description": "Image Puzzle Game - A beautiful sliding puzzle game where you reconstruct images",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "puzzle",
+    "game",
+    "15-puzzle"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.fifteenpuzzle.app",
+    "productName": "Image Puzzle",
+    "directories": {
+      "output": "dist",
+      "buildResources": "."
+    },
+    "files": [
+      "index.html",
+      "styles.css",
+      "script.js",
+      "main.js",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "icons/icons.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icons/icons.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "icons/icons.png"
+    }
+  }
+}
+
