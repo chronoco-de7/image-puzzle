@@ -16,6 +16,13 @@ class Puzzle15 {
     init() {
         this.createBoard();
         this.setupEventListeners();
+        // Initialize board with numbers (0-14, 15 as empty)
+        this.board = [];
+        for (let i = 0; i < 15; i++) {
+            this.board.push(i);
+        }
+        this.board.push(15); // Empty space
+        this.updateDisplay();
         // Load a random flower image
         this.loadRandomFlowerImage();
     }
@@ -71,29 +78,51 @@ class Puzzle15 {
     }
 
     async loadRandomFlowerImage() {
-        // Curated list of flower image URLs from Unsplash (public domain friendly)
-        // These are direct links that work reliably
-        const flowerImages = [
-            'https://images.unsplash.com/photo-1490750967868-88aa0986ca52?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1462271523903-6d3f27b8e2d5?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1520763185298-1b434c91965a?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1464822759843-b70a967b61b9?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1470509037663-253afd7f0f51?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1497446313529-9d3534804488?w=800&h=800&fit=crop',
-            'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=800&h=800&fit=crop'
-        ];
+        // GitHub repository configuration
+        const repoOwner = 'chronoco-de7';
+        const repoName = 'puzzle-images';
+        const branch = 'main';
+        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents`;
+        const rawBaseUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/${branch}/`;
         
-        // Pick a random flower image
-        const randomIndex = Math.floor(Math.random() * flowerImages.length);
-        let imageUrl = flowerImages[randomIndex];
+        // Image file extensions to filter
+        const imageExtensions = ['.jpeg', '.jpg', '.png', '.gif', '.webp', '.bmp'];
         
-        // Add cache-busting parameter to ensure fresh load
-        const cacheBuster = `&_=${Date.now()}`;
-        imageUrl = imageUrl.includes('?') ? imageUrl + cacheBuster : imageUrl + '?' + cacheBuster.substring(1);
-        
-        this.loadImage(imageUrl);
+        try {
+            // Fetch repository contents from GitHub API
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch repository contents: ${response.status}`);
+            }
+            
+            const files = await response.json();
+            
+            // Filter for image files only (exclude directories and non-image files)
+            const imageFiles = files
+                .filter(file => file.type === 'file' && imageExtensions.some(ext => 
+                    file.name.toLowerCase().endsWith(ext)
+                ))
+                .map(file => rawBaseUrl + file.name);
+            
+            if (imageFiles.length === 0) {
+                throw new Error('No image files found in repository');
+            }
+            
+            // Pick a random image from the list
+            const randomIndex = Math.floor(Math.random() * imageFiles.length);
+            let imageUrl = imageFiles[randomIndex];
+            
+            // Add cache-busting parameter to ensure fresh load
+            const cacheBuster = `?t=${Date.now()}`;
+            imageUrl = imageUrl.includes('?') ? imageUrl + '&t=' + Date.now() : imageUrl + cacheBuster;
+            
+            this.loadImage(imageUrl);
+        } catch (error) {
+            console.error('Error fetching images from GitHub:', error);
+            // Fallback to template image if GitHub fetch fails
+            this.loadImage('template.png');
+        }
     }
 
     showLoadingStatus() {
@@ -114,6 +143,10 @@ class Puzzle15 {
         // Stop any current game
         this.stopTimer();
         this.isPlaying = false;
+        
+        // Clear image pieces so numbers are shown while loading
+        this.imagePieces = [];
+        this.updateDisplay();
         
         // Show loading status
         this.showLoadingStatus();
@@ -335,12 +368,20 @@ class Puzzle15 {
             } else {
                 // Image piece tile
                 tile.classList.remove('empty');
-                if (this.imagePieces && this.imagePieces[value]) {
+                
+                // If images are loaded, show image piece
+                if (this.imagePieces && this.imagePieces.length > 0 && this.imagePieces[value]) {
                     const img = document.createElement('img');
                     img.src = this.imagePieces[value];
                     img.className = 'tile-image';
                     img.draggable = false;
                     tile.appendChild(img);
+                } else {
+                    // Show number while loading
+                    const number = document.createElement('div');
+                    number.className = 'tile-number';
+                    number.textContent = value + 1; // Display 1-15 instead of 0-14
+                    tile.appendChild(number);
                 }
             }
             
