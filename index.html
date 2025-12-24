@@ -39,12 +39,15 @@
       <div id="winMessage" class="win-message hidden">
         <div class="win-content">
           <h2>Congratulations!</h2>
-          <p>You solved the image puzzle!</p>
+          <p>You solved the puzzle!</p>
           <p class="win-stats">
             Moves: <span id="winMoves">0</span> | Time:
             <span id="winTime">00:00</span>
           </p>
-          <button id="playAgainBtn" class="btn btn-primary">Play Again</button>
+          <div class="win-buttons">
+            <button id="playAgainBtn" class="btn btn-primary">Restart</button>
+            <button id="closeWinBtn" class="btn btn-close">Close</button>
+          </div>
         </div>
       </div>
     </div>
