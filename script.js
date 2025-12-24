@@ -10,6 +10,10 @@ class Puzzle15 {
         this.imagePieces = [];
         this.savedBoardState = null;
         this.isShowingHint = false;
+        this.isNumberPuzzle = false;
+        this.timerStarted = false;
+        this.particleContainer = null;
+        this.isLoading = false;
         this.init();
     }
 
@@ -23,8 +27,8 @@ class Puzzle15 {
         }
         this.board.push(15); // Empty space
         this.updateDisplay();
-        // Load a random flower image
-        this.loadRandomFlowerImage();
+        // Start a new game (randomly choose image or number puzzle)
+        this.startNewGame();
     }
 
     createBoard() {
@@ -47,12 +51,20 @@ class Puzzle15 {
 
     setupEventListeners() {
         document.getElementById('shuffleBtn').addEventListener('click', () => {
-            this.loadRandomFlowerImage();
+            this.startNewGame();
         });
         document.getElementById('playAgainBtn').addEventListener('click', () => {
             document.getElementById('winMessage').classList.add('hidden');
-            this.loadRandomFlowerImage();
+            this.startNewGame();
         });
+        
+        // Close button for win message
+        const closeWinBtn = document.getElementById('closeWinBtn');
+        if (closeWinBtn) {
+            closeWinBtn.addEventListener('click', () => {
+                document.getElementById('winMessage').classList.add('hidden');
+            });
+        }
         
         // Hint button - show solved state on press, restore on release
         const hintBtn = document.getElementById('hintBtn');
@@ -75,6 +87,46 @@ class Puzzle15 {
             e.preventDefault();
             this.hideHint();
         });
+    }
+
+    startNewGame() {
+        // Reset game state
+        this.timerStarted = false;
+        this.stopTimer();
+        this.moveCount = 0;
+        this.updateMoveCount();
+        this.isPlaying = false;
+        
+        // Hide win message
+        document.getElementById('winMessage').classList.add('hidden');
+        
+        // Randomly decide: if random number is less than 1 (10%), use number puzzle
+        // Otherwise use image puzzle
+        const randomNum = Math.random();
+        const gameBoard = document.getElementById('gameBoard');
+        
+        if (randomNum < 0.1) {
+            // Use number puzzle (10% chance)
+            this.isNumberPuzzle = true;
+            this.imagePieces = [];
+            this.imageUrl = null;
+            gameBoard.classList.add('number-puzzle');
+            
+            // Show short loading screen
+            this.showLoadingStatus();
+            
+            // Simulate short loading delay, then show puzzle with animation
+            setTimeout(() => {
+                this.hideLoadingStatus();
+                this.shuffle();
+                this.animatePuzzleAppearance();
+            }, 800);
+        } else {
+            // Use image puzzle
+            this.isNumberPuzzle = false;
+            gameBoard.classList.remove('number-puzzle');
+            this.loadRandomFlowerImage();
+        }
     }
 
     async loadRandomFlowerImage() {
@@ -126,13 +178,17 @@ class Puzzle15 {
     }
 
     showLoadingStatus() {
+        this.isLoading = true;
         const loadingStatus = document.getElementById('loadingStatus');
         if (loadingStatus) {
             loadingStatus.classList.remove('hidden');
         }
+        // Clear display during loading
+        this.updateDisplay();
     }
 
     hideLoadingStatus() {
+        this.isLoading = false;
         const loadingStatus = document.getElementById('loadingStatus');
         if (loadingStatus) {
             loadingStatus.classList.add('hidden');
@@ -144,11 +200,10 @@ class Puzzle15 {
         this.stopTimer();
         this.isPlaying = false;
         
-        // Clear image pieces so numbers are shown while loading
+        // Clear image pieces
         this.imagePieces = [];
-        this.updateDisplay();
         
-        // Show loading status
+        // Show loading status (this will hide numbers)
         this.showLoadingStatus();
         
         this.imageUrl = imageUrl;
@@ -161,6 +216,7 @@ class Puzzle15 {
                 this.hideLoadingStatus();
                 this.splitImage(img);
                 this.shuffle();
+                this.animatePuzzleAppearance();
             }
         };
         
@@ -176,6 +232,7 @@ class Puzzle15 {
                         this.hideLoadingStatus();
                         this.splitImage(img2);
                         this.shuffle();
+                        this.animatePuzzleAppearance();
                     }
                 };
                 img2.onerror = () => {
@@ -221,7 +278,13 @@ class Puzzle15 {
     }
 
     showHint() {
-        if (!this.isPlaying || this.isShowingHint || !this.imagePieces.length) {
+        // Allow hint for both image and number puzzles
+        if (!this.isPlaying || this.isShowingHint) {
+            return;
+        }
+        
+        // For image puzzle, require imagePieces to be loaded
+        if (!this.isNumberPuzzle && !this.imagePieces.length) {
             return;
         }
         
@@ -276,7 +339,8 @@ class Puzzle15 {
     }
 
     shuffle() {
-        if (!this.imageUrl || this.imagePieces.length === 0) {
+        // Allow shuffle for number puzzle mode even without images
+        if (!this.isNumberPuzzle && (!this.imageUrl || this.imagePieces.length === 0)) {
             return;
         }
         
@@ -284,6 +348,7 @@ class Puzzle15 {
         this.updateMoveCount();
         this.stopTimer();
         this.isPlaying = false;
+        this.timerStarted = false;
         
         // Create solved state (0-14 for pieces, 15 for empty)
         this.board = [];
@@ -305,7 +370,7 @@ class Puzzle15 {
         
         this.emptyIndex = this.board.indexOf(15);
         this.updateDisplay();
-        this.startTimer();
+        // Don't start timer automatically - wait for first click
         this.isPlaying = true;
     }
 
@@ -332,6 +397,12 @@ class Puzzle15 {
 
     handleTileClick(index) {
         if (!this.isPlaying || this.isShowingHint) return;
+        
+        // Start timer on first click
+        if (!this.timerStarted) {
+            this.timerStarted = true;
+            this.startTimer();
+        }
         
         const emptyPos = this.board.indexOf(15);
         const possibleMoves = this.getPossibleMoves(emptyPos);
@@ -369,15 +440,27 @@ class Puzzle15 {
                 // Image piece tile
                 tile.classList.remove('empty');
                 
-                // If images are loaded, show image piece
-                if (this.imagePieces && this.imagePieces.length > 0 && this.imagePieces[value]) {
+                // Don't show anything during loading
+                if (this.isLoading) {
+                    // Leave tile empty during loading
+                    return;
+                }
+                
+                // If in number puzzle mode, always show number
+                if (this.isNumberPuzzle) {
+                    const number = document.createElement('div');
+                    number.className = 'tile-number';
+                    number.textContent = value + 1; // Display 1-15 instead of 0-14
+                    tile.appendChild(number);
+                } else if (this.imagePieces && this.imagePieces.length > 0 && this.imagePieces[value]) {
+                    // If images are loaded, show image piece
                     const img = document.createElement('img');
                     img.src = this.imagePieces[value];
                     img.className = 'tile-image';
                     img.draggable = false;
                     tile.appendChild(img);
                 } else {
-                    // Show number while loading
+                    // Show number if not loading and no images
                     const number = document.createElement('div');
                     number.className = 'tile-number';
                     number.textContent = value + 1; // Display 1-15 instead of 0-14
@@ -437,7 +520,83 @@ class Puzzle15 {
         
         document.getElementById('winMoves').textContent = this.moveCount;
         document.getElementById('winTime').textContent = timeString;
-        document.getElementById('winMessage').classList.remove('hidden');
+        
+        // Show particle effect first
+        this.createParticleEffect();
+        
+        // Show modal after a few seconds
+        setTimeout(() => {
+            document.getElementById('winMessage').classList.remove('hidden');
+        }, 2000);
+    }
+    
+    animatePuzzleAppearance() {
+        const tiles = document.querySelectorAll('.tile');
+        tiles.forEach((tile, index) => {
+            tile.style.opacity = '0';
+            tile.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                tile.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                tile.style.opacity = '1';
+                tile.style.transform = 'scale(1)';
+            }, index * 20);
+        });
+    }
+    
+    createParticleEffect() {
+        // Remove existing particle container if any
+        if (this.particleContainer) {
+            this.particleContainer.remove();
+        }
+        
+        // Create particle container
+        this.particleContainer = document.createElement('div');
+        this.particleContainer.className = 'particle-container';
+        document.body.appendChild(this.particleContainer);
+        
+        // Get game board center position
+        const gameBoard = document.getElementById('gameBoard');
+        const rect = gameBoard.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Create particles
+        const particleCount = 50;
+        const colors = ['#667eea', '#764ba2', '#f59e0b', '#ffffff'];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Start from center with fixed positioning
+            particle.style.position = 'fixed';
+            particle.style.left = centerX + 'px';
+            particle.style.top = centerY + 'px';
+            particle.style.marginLeft = '-4px';
+            particle.style.marginTop = '-4px';
+            
+            // Random direction and distance
+            const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5;
+            const distance = 150 + Math.random() * 150;
+            const randomX = Math.cos(angle) * distance;
+            const randomY = Math.sin(angle) * distance - 50; // Slight upward bias
+            
+            particle.style.setProperty('--random-x', randomX + 'px');
+            particle.style.setProperty('--random-y', randomY + 'px');
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.animationDelay = Math.random() * 0.3 + 's';
+            particle.style.animationDuration = (2 + Math.random() * 1) + 's';
+            
+            this.particleContainer.appendChild(particle);
+        }
+        
+        // Remove particles after animation
+        setTimeout(() => {
+            if (this.particleContainer) {
+                this.particleContainer.remove();
+                this.particleContainer = null;
+            }
+        }, 3500);
     }
 }
 

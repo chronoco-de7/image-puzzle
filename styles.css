@@ -129,20 +129,20 @@ h1 {
 }
 
 .btn-primary {
-    background: #667eea;
-    color: white;
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    color: #667eea;
+    box-shadow: 0 2px 5px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary:hover {
-    background: #5568d3;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+    background: #f0f4ff;
+    color: #5568d3;
+    box-shadow: 0 2px 5px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-primary:active {
     transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 2px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
 }
 
 .btn-hint {
@@ -200,6 +200,18 @@ h1 {
     will-change: transform;
 }
 
+.number-puzzle .tile:not(.empty) {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.15);
+}
+
+.number-puzzle .tile:not(.empty):hover {
+    background: linear-gradient(135deg, #e0e7ff 0%, #d1d5f7 100%);
+    box-shadow: 0 3px 6px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
 .tile::before {
     content: '';
     position: absolute;
@@ -248,6 +260,25 @@ h1 {
     border-radius: 7px;
     user-select: none;
     pointer-events: none;
+}
+
+.tile-number {
+    font-size: 1.5em;
+    font-weight: 800;
+    user-select: none;
+    pointer-events: none;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 3px rgba(102, 126, 234, 0.4));
+    position: relative;
 }
 
 .loading-status {
@@ -488,4 +519,64 @@ h1 {
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     display: block;
+}
+
+.win-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-close {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-close:active {
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.particle-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFloat 3s ease-out forwards;
+}
+
+@keyframes particleFloat {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--random-x, 0), var(--random-y, -100vh)) scale(0);
+        opacity: 0;
+    }
+}
+
+.tile {
+    opacity: 1;
+    transform: scale(1);
 }
