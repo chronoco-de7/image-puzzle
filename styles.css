@@ -122,8 +122,31 @@ h1 {
     font-variant-numeric: tabular-nums;
 }
 
+.info-item.disabled {
+    opacity: 0.5;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.info-item.disabled .info-label {
+    color: #64748b;
+}
+
+.info-item.disabled span:not(.info-label) {
+    color: #64748b;
+}
+
+.info-item.disabled:hover {
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
 .btn {
-    padding: 12px 24px;
+    padding: 8px 16px;
     border: none;
     border-radius: 16px;
     font-size: 0.85em;
@@ -198,7 +221,7 @@ h1 {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
-    gap: 8px;
+    gap: 4px;
     background: rgba(255, 255, 255, 0.06);
     padding: 16px;
     border-radius: 20px;
@@ -467,7 +490,7 @@ h1 {
     
     .game-board {
         padding: 12px;
-        gap: 6px;
+        gap: 3px;
     }
 }
 

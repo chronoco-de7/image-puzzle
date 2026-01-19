@@ -14,6 +14,8 @@ class Puzzle15 {
         this.timerStarted = false;
         this.particleContainer = null;
         this.isLoading = false;
+        this.timerPausedTime = null;
+        this.timerElapsedBeforePause = 0;
         this.init();
     }
 
@@ -288,9 +290,30 @@ class Puzzle15 {
             return;
         }
         
+        // Pause timer if it's running
+        if (this.timerStarted && this.timerInterval) {
+            // Calculate elapsed time before pausing
+            this.timerElapsedBeforePause = Math.floor((Date.now() - this.startTime) / 1000);
+            // Stop the timer interval
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+            // Save the pause time
+            this.timerPausedTime = Date.now();
+        }
+        
         // Save current board state
         this.savedBoardState = [...this.board];
         this.isShowingHint = true;
+        
+        // Disable moves and time display
+        const moveCount = document.getElementById('moveCount');
+        const timer = document.getElementById('timer');
+        if (moveCount && moveCount.parentElement) {
+            moveCount.parentElement.classList.add('disabled');
+        }
+        if (timer && timer.parentElement) {
+            timer.parentElement.classList.add('disabled');
+        }
         
         // Create solved state (0-14 in order, 15 as empty)
         this.board = [];
@@ -311,6 +334,26 @@ class Puzzle15 {
         this.board = [...this.savedBoardState];
         this.savedBoardState = null;
         this.isShowingHint = false;
+        
+        // Re-enable moves and time display
+        const moveCount = document.getElementById('moveCount');
+        const timer = document.getElementById('timer');
+        if (moveCount && moveCount.parentElement) {
+            moveCount.parentElement.classList.remove('disabled');
+        }
+        if (timer && timer.parentElement) {
+            timer.parentElement.classList.remove('disabled');
+        }
+        
+        // Resume timer if it was running before
+        if (this.timerStarted && this.timerPausedTime) {
+            // Adjust startTime to account for paused duration
+            this.startTime = Date.now() - (this.timerElapsedBeforePause * 1000);
+            // Restart the timer
+            this.startTimer();
+            this.timerPausedTime = null;
+            this.timerElapsedBeforePause = 0;
+        }
         
         this.updateDisplay();
     }
@@ -493,7 +536,10 @@ class Puzzle15 {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-        document.getElementById('timer').textContent = '00:00';
+        // Only reset display if we're actually stopping (not pausing)
+        if (!this.isShowingHint) {
+            document.getElementById('timer').textContent = '00:00';
+        }
     }
 
     checkWin() {
