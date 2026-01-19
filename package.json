@@ -1,5 +1,5 @@
 {
-  "name": "fifteen-puzzle",
+  "name": "image-puzzle",
   "version": "1.0.0",
   "description": "Image Puzzle Game - A beautiful sliding puzzle game where you reconstruct images",
   "main": "main.js",
@@ -12,8 +12,7 @@
   },
   "keywords": [
     "puzzle",
-    "game",
-    "15-puzzle"
+    "game"
   ],
   "author": "",
   "license": "MIT",
@@ -22,7 +21,7 @@
     "electron-builder": "^24.9.1"
   },
   "build": {
-    "appId": "com.fifteenpuzzle.app",
+    "appId": "com.imagepuzzle.app",
     "productName": "Image Puzzle",
     "directories": {
       "output": "dist",
