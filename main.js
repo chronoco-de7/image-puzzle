@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -16,8 +16,10 @@ function createWindow() {
     backgroundColor: '#ffffff',
     show: false,
     titleBarStyle: 'default',
-    resizable: true
+    autoHideMenuBar: true
   });
+
+  Menu.setApplicationMenu(null);
 
   // Load the HTML file
   win.loadFile(path.join(__dirname, 'index.html')).catch(err => {
