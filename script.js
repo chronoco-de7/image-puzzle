@@ -197,7 +197,7 @@ class Puzzle15 {
         }
     }
 
-    loadImage(imageUrl) {
+    loadImage(imageUrl, isRetry = false) {
         // Stop any current game
         this.stopTimer();
         this.isPlaying = false;
@@ -238,15 +238,27 @@ class Puzzle15 {
                     }
                 };
                 img2.onerror = () => {
-                    // Fallback to default image if random image fails
-                    console.warn('Failed to load image, using fallback');
-                    this.loadImage('template.png');
+                    if (!isRetry && imageUrl !== 'template.png') {
+                        // Fallback to default image if random image fails
+                        console.warn('Failed to load image, using fallback');
+                        this.loadImage('template.png', true);
+                    } else {
+                        // Final fallback: switch to number puzzle
+                        console.warn('All image loading failed, switching to number puzzle');
+                        this.fallbackToNumberPuzzle();
+                    }
                 };
                 img2.src = imageUrl;
             } else {
-                // Fallback to default image if random image fails
-                console.warn('Failed to load image, using fallback');
-                this.loadImage('template.png');
+                if (!isRetry && imageUrl !== 'template.png') {
+                    // Fallback to default image if random image fails
+                    console.warn('Failed to load image, using fallback');
+                    this.loadImage('template.png', true);
+                } else {
+                    // Final fallback: switch to number puzzle
+                    console.warn('All image loading failed, switching to number puzzle');
+                    this.fallbackToNumberPuzzle();
+                }
             }
         };
         
@@ -277,6 +289,20 @@ class Puzzle15 {
             clearTimeout(loadTimeout);
             handleSuccess();
         }
+    }
+    
+    fallbackToNumberPuzzle() {
+        // Switch to number puzzle mode as ultimate fallback
+        this.isNumberPuzzle = true;
+        this.imagePieces = [];
+        this.imageUrl = null;
+        const gameBoard = document.getElementById('gameBoard');
+        gameBoard.classList.add('number-puzzle');
+        
+        // Hide loading and start number puzzle
+        this.hideLoadingStatus();
+        this.shuffle();
+        this.animatePuzzleAppearance();
     }
 
     showHint() {
@@ -448,24 +474,110 @@ class Puzzle15 {
         }
         
         const emptyPos = this.board.indexOf(15);
-        const possibleMoves = this.getPossibleMoves(emptyPos);
+        const clickedRow = Math.floor(index / 4);
+        const clickedCol = index % 4;
+        const emptyRow = Math.floor(emptyPos / 4);
+        const emptyCol = emptyPos % 4;
         
-        if (possibleMoves.includes(index)) {
-            const clickedTile = document.querySelectorAll('.tile')[index];
-            clickedTile.classList.add('moving');
-            
-            this.swapTiles(emptyPos, index);
-            this.emptyIndex = this.board.indexOf(15);
-            this.moveCount++;
-            this.updateMoveCount();
-            this.updateDisplay();
-            
-            setTimeout(() => {
-                clickedTile.classList.remove('moving');
-            }, 300);
-            
-            this.checkWin();
+        // Check if clicked tile is in same row or column as empty space
+        if (clickedRow === emptyRow) {
+            // Same row - slide tiles horizontally
+            this.slideRow(clickedRow, clickedCol, emptyCol);
+        } else if (clickedCol === emptyCol) {
+            // Same column - slide tiles vertically
+            this.slideColumn(clickedCol, clickedRow, emptyRow);
         }
+        // If not in same row or column, do nothing
+    }
+    
+    slideRow(row, clickedCol, emptyCol) {
+        // Determine direction and range of tiles to move
+        const start = Math.min(clickedCol, emptyCol);
+        const end = Math.max(clickedCol, emptyCol);
+        
+        // Collect tiles that will move
+        const movingTiles = [];
+        for (let col = start; col <= end; col++) {
+            const tileIndex = row * 4 + col;
+            movingTiles.push(document.querySelectorAll('.tile')[tileIndex]);
+        }
+        
+        // Add moving class for animation
+        movingTiles.forEach(tile => tile.classList.add('moving'));
+        
+        // Perform the slide
+        if (clickedCol < emptyCol) {
+            // Clicked tile is to the left of empty space - shift tiles right
+            for (let col = emptyCol; col > clickedCol; col--) {
+                const currentPos = row * 4 + col;
+                const prevPos = row * 4 + (col - 1);
+                this.swapTiles(currentPos, prevPos);
+            }
+        } else {
+            // Clicked tile is to the right of empty space - shift tiles left
+            for (let col = emptyCol; col < clickedCol; col++) {
+                const currentPos = row * 4 + col;
+                const nextPos = row * 4 + (col + 1);
+                this.swapTiles(currentPos, nextPos);
+            }
+        }
+        
+        this.emptyIndex = this.board.indexOf(15);
+        this.moveCount++;
+        this.updateMoveCount();
+        this.updateDisplay();
+        
+        // Remove moving class after animation
+        setTimeout(() => {
+            movingTiles.forEach(tile => tile.classList.remove('moving'));
+        }, 300);
+        
+        this.checkWin();
+    }
+    
+    slideColumn(col, clickedRow, emptyRow) {
+        // Determine direction and range of tiles to move
+        const start = Math.min(clickedRow, emptyRow);
+        const end = Math.max(clickedRow, emptyRow);
+        
+        // Collect tiles that will move
+        const movingTiles = [];
+        for (let row = start; row <= end; row++) {
+            const tileIndex = row * 4 + col;
+            movingTiles.push(document.querySelectorAll('.tile')[tileIndex]);
+        }
+        
+        // Add moving class for animation
+        movingTiles.forEach(tile => tile.classList.add('moving'));
+        
+        // Perform the slide
+        if (clickedRow < emptyRow) {
+            // Clicked tile is above empty space - shift tiles down
+            for (let row = emptyRow; row > clickedRow; row--) {
+                const currentPos = row * 4 + col;
+                const prevPos = (row - 1) * 4 + col;
+                this.swapTiles(currentPos, prevPos);
+            }
+        } else {
+            // Clicked tile is below empty space - shift tiles up
+            for (let row = emptyRow; row < clickedRow; row++) {
+                const currentPos = row * 4 + col;
+                const nextPos = (row + 1) * 4 + col;
+                this.swapTiles(currentPos, nextPos);
+            }
+        }
+        
+        this.emptyIndex = this.board.indexOf(15);
+        this.moveCount++;
+        this.updateMoveCount();
+        this.updateDisplay();
+        
+        // Remove moving class after animation
+        setTimeout(() => {
+            movingTiles.forEach(tile => tile.classList.remove('moving'));
+        }, 300);
+        
+        this.checkWin();
     }
 
     updateDisplay() {
