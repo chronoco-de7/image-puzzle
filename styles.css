@@ -23,6 +23,7 @@ body {
 }
 
 .container {
+    -webkit-app-region: drag;
     background: rgba(15, 23, 42, 0.4);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -30,7 +31,7 @@ body {
     padding: 24px;
     box-shadow: none;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -54,6 +55,7 @@ h1 {
     font-size: 4em;
     color: #f1f5f9;
     margin-bottom: 8px;
+    padding-top: 24px;
     font-weight: 800;
     letter-spacing: -0.5px;
     line-height: 1.2;
@@ -68,6 +70,7 @@ h1 {
 }
 
 .game-info {
+    -webkit-app-region: no-drag;
     width: 100%;
     max-width: 500px;
     display: flex;
@@ -218,6 +221,7 @@ h1 {
 }
 
 .game-board {
+    -webkit-app-region: no-drag;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(4, 1fr);
@@ -350,6 +354,7 @@ h1 {
 }
 
 .loading-status {
+    -webkit-app-region: no-drag;
     position: fixed;
     top: 0;
     left: 0;
@@ -406,6 +411,7 @@ h1 {
 }
 
 .win-message {
+    -webkit-app-region: no-drag;
     position: fixed;
     top: 0;
     left: 0;

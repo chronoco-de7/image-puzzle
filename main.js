@@ -11,11 +11,12 @@ function createWindow() {
     maxHeight: 700,
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      devTools: false,
     },
+    titleBarStyle: 'hiddenInset',
     backgroundColor: '#ffffff',
     show: false,
-    titleBarStyle: 'default',
     autoHideMenuBar: true
   });
 
@@ -42,6 +43,9 @@ function createWindow() {
     console.error('Failed to load:', errorCode, errorDescription);
     win.show(); // Show window even on error
   });
+
+  // Disable context menu (right-click)
+  win.webContents.on('context-menu', (e) => e.preventDefault());
 
   // Open DevTools on error for debugging (optional - remove in production)
   win.webContents.on('crashed', () => {
