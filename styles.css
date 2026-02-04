@@ -517,6 +517,20 @@ h1 {
     line-height: 1.6;
 }
 
+.win-content .win-body {
+    color: #e2e8f0;
+    font-size: 1.02em;
+    line-height: 1.75;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    margin-bottom: 24px;
+    padding: 0 8px;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
 .win-stats {
     font-size: 1.1em;
     font-weight: 700;
