@@ -5,7 +5,7 @@ A sliding puzzle game where you reconstruct images.
 ## Screenshots
 
 | Gameplay | Completed |
-|----------|----------|-----------|
+|----------|-----------|
 | ![Gameplay](screenshot/screen.png) | ![Completed](screenshot/complete.png) |
 
 ## How to Run
