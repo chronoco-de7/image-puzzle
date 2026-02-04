@@ -4,11 +4,9 @@ A sliding puzzle game where you reconstruct images.
 
 ## Screenshots
 
-| Gameplay | Completed |
-|----------|-----------|
-| ![Gameplay](screenshot/screen.png) | ![Completed](screenshot/complete.png) |
-
-![Gameplay](screenshot/screen2.png)
+| Gameplay(Number) | Gameplay(Image) | Completed |
+|----------|----------|-----------|
+| ![Gameplay](screenshot/screen.png) | ![Gameplay](screenshot/screen2.png) | ![Completed](screenshot/complete.png) |
 
 ## How to Run
 
